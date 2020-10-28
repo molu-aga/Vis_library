@@ -149,6 +149,7 @@
         // if (properties.item && target.tagName === "DIV") focusMethod(target);
         if (properties.item && target.tagName === "INPUT") target.focus();
         if (properties.item && target.tagName === "BUTTON") getInputValue(item, target);
+        items.update(item)
     }); 
 
     focusMethod = function getFocus(target) {
