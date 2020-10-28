@@ -11,11 +11,8 @@
 
   <script src="./dist/vis.js"></script>
   <link href="./dist/vis-timeline-graph2d.min.css" rel="stylesheet" type="text/css" />
-
-
   <script src="https://cdn.jsdelivr.net/npm/sweetalert@1.1.3/dist/sweetalert.min.js"></script>
   <link href="https://cdn.jsdelivr.net/npm/sweetalert@1.1.3/dist/sweetalert.css" rel="stylesheet" type="text/css"/>
-
   <script src="./dist/vis-timeline-graph2d.min.js"></script>
   
  
@@ -24,6 +21,7 @@
 <body>
   <div id="visualization"></div>
   <p></p>
+  <button onclick="onDownload()">Download</button>
   <div id="log"></div>
 <script type="text/javascript">
   // note that months are zero-based in the JavaScript Date object, so month 3 is April
@@ -44,6 +42,12 @@
   // Configuration for the Timeline
   var options = {
     editable: true,
+
+    template: function(item) {
+            return '<div><input placeholder="edit me..." type="text"></input><button>send value</button></div>'
+        },
+
+
 
     onAdd: function (item, callback) {
       prettyPrompt('Add item', 'Enter text content for new item:', item.content, function (value) {
@@ -81,7 +85,7 @@
     },
 
     onUpdate: function (item, callback) {
-      prettyPrompt('Update item', 'Edit items text:', item.content, function (value) {
+       prettyPrompt('Update item', 'Edit items text:', item.content, function (value) {
         if (value) {
           item.content = value;
           callback(item); // send back adjusted item
@@ -89,7 +93,7 @@
         else {
           callback(null); // cancel updating the item
         }
-      });
+      }); 
     },
 
     onRemove: function (item, callback) {
@@ -136,6 +140,42 @@
       inputValue: inputValue
     }, callback);
   }
+
+
+   timeline.on('click', function(properties) {
+        var target = properties.event.target;
+        var item = items.get(properties.item);
+        console.log(properties.event);
+        // if (properties.item && target.tagName === "DIV") focusMethod(target);
+        if (properties.item && target.tagName === "INPUT") target.focus();
+        if (properties.item && target.tagName === "BUTTON") getInputValue(item, target);
+    }); 
+
+    focusMethod = function getFocus(target) {
+        // target.insertAfter("BUTTON");
+        target.firstChild.focus();
+    }
+
+    getInputValue = function getValue(item, target) {
+        target.focus();
+        var inputValue = (target.parentNode.firstChild.value) ? target.parentNode.firstChild.value : "no value entered ";
+        item.content = inputValue;
+        alert(item.content)
+    }
+
+
+  function download(content, fileName, contentType) {
+ const a = document.createElement("a");
+ const file = new Blob([content], { type: contentType });
+ a.href = URL.createObjectURL(file);
+ a.download = fileName;
+ a.click();
+}
+
+function onDownload(){
+ download(JSON.stringify(items), "download.json", "text/plain");
+}
+
 </script>
 </body>
 </html>
