@@ -1,0 +1,109 @@
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Timeline | other | React 16 Components in templates</title>
+
+    <meta name="example-screenshot-selector" content="#root" />
+
+    <style>
+        .vis-item-visible-frame {
+            z-index: 111111;
+            position: absolute;
+            top: 0;
+        }
+    </style>
+  </head>
+  <body>
+
+    <div id='root'></div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/16.4.2/umd/react.development.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/16.4.2/umd/react-dom.development.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/16.5.1/umd/react-dom-server.browser.development.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.23/browser.min.js"></script>
+
+    <script src="./dist/vis-timeline-graph2d.min.js"></script>
+     <link href="./dist/vis-timeline-graph2d.min.css" rel="stylesheet" type="text/css" /> 
+    
+
+    <script type="text/babel">
+            window.items = new vis.DataSet([
+    {id: 1, content: 'item 1', start: new Date(2013, 3, 20)},
+    {id: 2, content: 'item 2', start: new Date(2013, 3, 14)},
+    {id: 3, content: 'item 3', start: new Date(2013, 3, 18)},
+    {id: 4, content: 'item 4', start: new Date(2013, 3, 16), end: new Date(2013, 3, 19)},
+    {id: 5, content: 'item 5', start: new Date(2013, 3, 25)},
+    {id: 6, content: 'item 6', start: new Date(2013, 3, 27)}
+  ]);
+
+        class Template extends React.Component {
+            constructor(props){
+                super(props);
+            }
+            render() {
+                return <div>
+                    <input placeholder="edit me..." type="text"></input>
+                    <button>aaaa</button>
+                    <label>{this.props.item.content}</label>
+                </div>
+            }
+        }
+
+        // specify options
+        var options = {
+            editable: true,
+             onInitialDrawComplete: () => {
+                window.timeline.setItems(window.items)
+            }, 
+            template: function (item, element) {
+                if (!item) { return }                
+
+                return ReactDOM.createPortal( ReactDOM.render( <Template item={item} />, element ), element, () => { window.timeline.redraw()} );
+    
+            },
+        }
+    
+        class Timeline extends React.Component {
+            componentDidMount() {
+                return initTimeline();
+            }
+            render() {
+                return <div>
+                    <h1>timline with React</h1>
+                    <h2>Using react components for items and group templates</h2>  
+                    <div id="visualization"></div>
+                </div>
+            }
+        };
+
+        function initTimeline() {
+            var container = document.getElementById('visualization');
+            window.timeline = new vis.Timeline(container, items, options);
+            timeline.on('click', function(properties) {
+        var target = properties.event.target;
+        var item = items.get(properties.item);
+       // console.log(properties.event);
+       if (properties.item && target.tagName === "DIV") getFocus(target);
+        if (properties.item && target.tagName === "INPUT") target.focus();
+        if (properties.item && target.tagName === "BUTTON") getValue(item, target);
+       items.update(item)
+    });   
+
+    function getFocus(target) {
+        //target.insertAfter("BUTTON");
+        target.firstChild.focus();
+    }
+   function getValue(item, target) {
+    target.focus();
+    var inputValue = (target.parentNode.firstChild.value) ? target.parentNode.firstChild.value : "no value entered ";
+        item.content = inputValue;
+        alert(item.content)
+    }
+     } 
+
+ReactDOM.render(<Timeline />, document.getElementById('root'));
+
+    </script>
+  </body>
+</html>
