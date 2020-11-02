@@ -1,4 +1,4 @@
-<html>
+﻿<html>
   <head>
     <meta charset="utf-8">
     <title>Timeline | other | React 16 Components in templates</title>
@@ -100,6 +100,55 @@
         item.content = inputValue;
         alert(item.content)
     }
+	
+	function handleDragStart(event) {
+        var dragSrcEl = event.target;
+
+        event.dataTransfer.effectAllowed = 'move';
+        var itemType = event.target.innerHTML.split('-')[1].trim();
+        var item = {
+            id: new Date(),
+            type: itemType,
+            content: event.target.innerHTML.split('-')[0].trim()
+        };
+        // set event.target ID with item ID
+        event.target.id = new Date(item.id).toISOString();
+
+        var isFixedTimes = (event.target.innerHTML.split('-')[2] && event.target.innerHTML.split('-')[2].trim() == 'fixed times')
+        if (isFixedTimes) {
+            item.start = new Date();
+            item.end = new Date(1000 * 60 * 10 + (new Date()).valueOf());
+        }
+        event.dataTransfer.setData("text", JSON.stringify(item));
+
+        // Trigger on from the new item dragged when this item drag is finish
+        event.target.addEventListener('dragend', handleDragEnd.bind(this), false);
+    }
+	
+	 function handleDragEnd(event) {
+        // Last item that just been dragged, its ID is the same of event.target
+        var newItem_dropped = timeline1.itemsData.get(event.target.id);
+
+        var html = "<b>id: </b>" + newItem_dropped.id + "<br>";
+        html += "<b>content: </b>" + newItem_dropped.content + "<br>";
+        html += "<b>start: </b>" + newItem_dropped.start + "<br>";
+        html += "<b>end: </b>" + newItem_dropped.end + "<br>";
+        document.getElementById('output').innerHTML = html;
+    }
+
+    function handleObjectItemDragStart(event) {
+        var dragSrcEl = event.target;
+
+        event.dataTransfer.effectAllowed = 'move';
+        var objectItem = {
+            content: 'objectItemData',
+            target: 'item'
+        };
+        event.dataTransfer.setData("text", JSON.stringify(objectItem));
+    }
+	
+	   
+	
      } 
 
 ReactDOM.render(<Timeline />, document.getElementById('root'));
